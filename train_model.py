@@ -13,8 +13,6 @@ from model.cnn_model import TextCNN
 from model.lstm import TextLSTM
 from model.util import batch_iter
 
-# Credits to
-# http://stackoverflow.com/questions/35714995/computing-exact-moving-average-over-multiple-batches-in-tensorflow
 def make_summary(name, val):
     return summary_pb2.Summary(value=[summary_pb2.Summary.Value(tag=name, simple_value=val)])
 
@@ -123,8 +121,6 @@ shuffle_indices = np.random.permutation(np.arange(n_data))
 x_shuffled = x[shuffle_indices]
 y_shuffled = y[shuffle_indices]
 
-# TODO: This is very crude, should use cross-validation
-
 # Train/dev split
 n_dev = int(FLAGS.dev_ratio * n_data)
 n_train = n_data - n_dev
@@ -153,8 +149,6 @@ with tf.Graph().as_default():
     sess = tf.Session(config=session_conf)
     embedding_dim = embeddings.shape[1]
     with sess.as_default():
-        # TODO(andrei): Warn on all unused flags (e.g. set CNN options when
-        # using an LSTM).
         if FLAGS.lstm:
             print("\nUsing LSTM.")
             model = TextLSTM(sequence_length=x_train.shape[1],
@@ -182,7 +176,6 @@ with tf.Graph().as_default():
 
         # If enabled, we apply gradient clipping, in order to deal with the
         # exploding gradient problem common when training LSTMs.
-        # TODO(andrei): Gradient magnitude tracing to see effectiveness of
         # clipping.
         if FLAGS.clip_gradients:
             print("Will clip gradients |.| < {0}"
@@ -199,7 +192,8 @@ with tf.Graph().as_default():
                 if gradient is None:
                     # Workaround for a particular case where a variable's
                     # gradient was returned 'None' by 'compute_gradients'.
-                    # TODO(andrei): Investigate whether this matters.
+                    # 
+                    (andrei): Investigate whether this matters.
                     return None
                 return tf.clip_by_value(gradient,
                                         -FLAGS.clip_gradient_value,
@@ -236,7 +230,6 @@ with tf.Graph().as_default():
         print("Meta-information will be written to {}.".format(meta_fname))
 
         with open(meta_fname, 'w') as meta_file:
-            # TODO(andrei): Add whatever additional information is necessary.
             meta_file.write("Meta-information\n")
             meta_file.write("Label: {0}\n".format(FLAGS.label))
             if FLAGS.lstm:
@@ -370,7 +363,6 @@ with tf.Graph().as_default():
             if current_step is None:
                 print("No checkpointing to do.")
             else:
-                # TODO(andrei): Consider also evaluating here.
                 print("Training interrupted. Performing final checkpoint.")
                 print("Press C-c again to forcefully interrupt this.")
                 path = saver.save(sess, checkpoint_prefix, global_step=current_step)
