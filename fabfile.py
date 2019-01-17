@@ -1,7 +1,5 @@
 """Fabric deployment file for remote model training.
 
-TODO(andrei): fabric is kind of deprecated. Use 'pyinvoke'.
-
 Uses a Python 3 fork of Fabric (http://www.fabfile.org/).
 Please install 'Fabric3' to use this, NOT the vanilla 'fabric'.
 
@@ -33,7 +31,7 @@ env.use_ssh_config = True
 
 def latest_run_id():
     """Returns the ID of the most recent TF run."""
-    # TODO(andrei): Nicer way of doing this?
+    
     return "ls -t ~/deploy/data/runs | cat | head -n1"
 
 
@@ -107,11 +105,7 @@ def _run_euler(run_label):
     print("Uploaded data and code. Starting to train.")
 
     with cd('deploy'):
-        # TODO(andrei): Run on scratch instead of in '~', since the user root
-        # on Euler only has a quota of 20Gb but scratch is fuckhuge.
-        # TODO(andrei): Warn when writing to scratch, since files in scratch get
-        # cleared out every 15 days.
-        # Creates a timestamped folder in which to run.
+
         ts = '$(date +%Y%m%dT%H%M%S)'
         # Hint: Replace the "heavy" 'train_model' call with 'tensor_hello' if
         # you just want to test things out.
@@ -133,7 +127,6 @@ def _run_tf(run_label: str) -> str:
     It is called inside a screen right away when running on AWS, and submitted
     to LFS using 'bsub' on Euler.
     """
-    # TODO(andrei): Pass these all these parameters as arguments to fabric.
     return (' ../train_model.py --num_epochs 6 --lstm'
             ' --data_root ../data'
             ' --clip_gradients'
@@ -160,7 +153,7 @@ def gce(sub='run', label='gce'):
 
 
 def _sync_data_and_code():
-    # TODO(andrei): '--progress' flag for rsync or pipe through 'pv'.
+
     run('mkdir -p ~/deploy/data/preprocessing')
 
     # Ensure we have a trailing slash for rsync to work as intended.
@@ -182,8 +175,7 @@ def _download_results(prefix):
     """Downloads all the TF output data from the remote host."""
     local('mkdir -p data/runs/{0}'.format(prefix))
 
-    # TODO(andrei): Nicer folder structure.
-    # TODO(andrei): Random tmp folder for maximum Euler compatibility.
+
     run('mkdir -p /tmp/last_tf_run')
     run('cp -R ~/deploy/data/runs/$({})/ /tmp/last_tf_run'.format(latest_run_id()),
         shell_escape=False, shell=False)
