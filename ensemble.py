@@ -131,7 +131,6 @@ def evaluate(config: ModelConfig) -> Tuple[float, np.ndarray]:
         return acc, predictions_out
 
 
-# TODO(andrei): Remove code duplication between this and 'evaluate'.
 def predict(config: ModelConfig) -> np.ndarray:
     graph = tf.Graph()
     with graph.as_default(), tf.Session() as sess:
@@ -167,7 +166,6 @@ def main(_):
             "Please specify a TensorFlow checkpoint file to use for making the"
             " predictions (--checkpoint_file <file>).")
 
-    # TODO(andrei): Document better or scrap in favor of pre-written configs.
     if FLAGS.second_checkpoint_file is not None:
         print("Using poor man's ensemble.")
         second_cp = FLAGS.second_checkpoint_file
@@ -226,8 +224,6 @@ def main(_):
             aggregate_acc = correct * 1.0 / evlim
             print("Final aggregate accuracy: {0}".format(aggregate_acc))
 
-        # TODO(andrei): Make code a little less wasteful in terms of reloading
-        # models.
         print("Will now perform official prediction using ensemble.")
         preds_A = predict(config_A)
         preds_B = predict(config_B)
